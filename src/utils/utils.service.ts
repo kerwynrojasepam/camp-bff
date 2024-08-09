@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { catchError, firstValueFrom, Observable } from 'rxjs';
 import { AxiosError, AxiosResponse } from 'axios';
+import { getSlug } from './getSlug';
 
 @Injectable()
 export class UtilsService {
@@ -21,5 +22,9 @@ export class UtilsService {
     );
 
     return data;
+  }
+
+  async getSlug(text: string) {
+    return getSlug(text);
   }
 }

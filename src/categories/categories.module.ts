@@ -1,11 +1,11 @@
 import { Module } from '@nestjs/common';
 import { CategoriesController } from './categories.controller';
 import { CategoriesService } from './categories.service';
-import { HttpModule } from '@nestjs/axios';
 import { UtilsModule } from 'src/utils';
+import { MagentoModule } from 'src/magento';
 
 @Module({
-  imports: [HttpModule, UtilsModule],
+  imports: [UtilsModule, MagentoModule],
   controllers: [CategoriesController],
   providers: [CategoriesService],
 })

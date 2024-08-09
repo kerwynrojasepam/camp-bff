@@ -1,10 +1,10 @@
 export type CategoryId = number;
 
-interface Parent {
+export interface Parent {
   id: CategoryId;
 }
 
-interface Ancestor extends Parent {
+export interface Ancestor extends Parent {
   type: 'category';
 }
 
