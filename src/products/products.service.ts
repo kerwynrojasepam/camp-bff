@@ -192,7 +192,7 @@ export class ProductsService {
             }
 
             return {
-              name: mappedAttribute.code,
+              name: mappedAttribute.label,
               value: mappedAttribute.options[customAttribute.value],
             };
           })
