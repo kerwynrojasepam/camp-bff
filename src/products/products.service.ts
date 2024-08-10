@@ -107,15 +107,20 @@ export class ProductsService {
       `products/${parentSKU}`,
     );
 
-    return this.transformMagentoProductToProduct(magentoProduct);
+    return this.transformMagentoProductToProduct(magentoProduct, sku);
   }
 
   private async transformMagentoProductToProduct(
     magentoProduct: MagentoProduct,
+    variantSKU: ProductSKU = null,
   ): Promise<Product> {
     const productVariants = await this.getProductVariantsBySku(
       magentoProduct.sku,
     );
+
+    const masterVariant = variantSKU
+      ? productVariants.find((variant) => variant.sku === variantSKU)
+      : productVariants[0];
 
     const descriptionAttribute = magentoProduct.custom_attributes.find(
       (attr) => attr.attribute_code === 'description',
@@ -134,7 +139,7 @@ export class ProductsService {
       name: magentoProduct.name,
       description,
       variants: productVariants,
-      masterVariant: productVariants[0], // TODO: Review if this is correct
+      masterVariant, // TODO: Review if this is correct
     };
 
     return product;
