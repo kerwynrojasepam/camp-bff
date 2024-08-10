@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import {
   CurrencyCode,
   Product,
+  ProductSKU,
   ProductsResponse,
   ProductVariant,
 } from './interfaces/product.interface';
@@ -97,6 +98,16 @@ export class ProductsService {
       limit,
       offset,
     };
+  }
+
+  async getProductBySKU(sku: ProductSKU): Promise<Product> {
+    // TODO: Find a better way to get the parent SKU
+    const parentSKU = sku.split('-')[0];
+    const magentoProduct = await this.magentoService.get<MagentoProduct>(
+      `products/${parentSKU}`,
+    );
+
+    return this.transformMagentoProductToProduct(magentoProduct);
   }
 
   private async transformMagentoProductToProduct(
