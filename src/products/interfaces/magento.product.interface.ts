@@ -1,5 +1,5 @@
 export type MagentoProductId = number;
-export type MagentoProductSKU = number;
+export type MagentoProductSKU = string;
 
 export interface MagentoProductsResponseGet {
   items: MagentoProduct[];

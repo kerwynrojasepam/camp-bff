@@ -1,6 +1,6 @@
 export type ProductId = number;
 export type ProductVariantId = number;
-export type ProductSKU = number;
+export type ProductSKU = string;
 
 export enum CurrencyCode {
   USD = 'USD',

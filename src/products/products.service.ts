@@ -11,65 +11,144 @@ import {
 } from './interfaces/magento.product.interface';
 import { MagentoService } from 'src/magento/magento.service';
 import { CategoryId } from 'src/categories/interfaces/category.interface';
-import { UtilsService } from 'src/utils/utils.service';
 import { MagentoProductVariant } from './interfaces/magento.product-variant.interface';
 import {
   MagentoProductAttribute,
-  MagentoProductAttributeMapped,
   MagentoProductAttributesMapped,
 } from './interfaces/magento.product-attribute.interface';
+import { getMappedProductAttribute, getProductsByCategoryUrl } from './utils';
+import { ConfigService } from '@nestjs/config';
 
-function getCurrentPage(offset: number, pageSize: number) {
-  return Math.floor(offset / pageSize) + 1;
-}
+@Injectable()
+export class ProductsService {
+  private _magentoProductAttributesMapped = null;
 
-function getMappedProductAttribute(
-  magentoAttribute: MagentoProductAttribute,
-): MagentoProductAttributeMapped {
-  return {
-    code: magentoAttribute.attribute_code,
-    label: magentoAttribute.default_frontend_label,
-    options: magentoAttribute.options.reduce(
-      (mappedAttribute, option) => {
-        mappedAttribute[option.value] = {
-          label: option.label,
-          key: option.value,
-        };
+  constructor(
+    private readonly magentoService: MagentoService,
+    private readonly configService: ConfigService,
+  ) {}
 
-        return mappedAttribute;
-      },
-      {} as MagentoProductAttributeMapped['options'],
-    ),
-  };
-}
+  async getSizeAndColorAttributesMapped(): Promise<MagentoProductAttributesMapped> {
+    if (this._magentoProductAttributesMapped) {
+      return this._magentoProductAttributesMapped;
+    }
 
-async function transformMagentoProductToProduct(
-  magentoProduct: MagentoProduct,
-  magentoProductVariants: MagentoProductVariant[],
-  magentoProductAttributesMapped: MagentoProductAttributesMapped,
-): Promise<Product> {
-  // Extract description from custom_attributes
-  const descriptionAttribute = magentoProduct.custom_attributes.find(
-    (attr) => attr.attribute_code === 'description',
-  );
-  const description = descriptionAttribute ? descriptionAttribute.value : '';
+    const magentoAttributeSizePromise =
+      this.magentoService.get<MagentoProductAttribute>(
+        `products/attributes/size`,
+      );
+    const magentoAttributeColorPromise =
+      this.magentoService.get<MagentoProductAttribute>(
+        `products/attributes/color`,
+      );
 
-  const slugAttribute = magentoProduct.custom_attributes.find(
-    (attr) => attr.attribute_code === 'url_key',
-  );
-  const slug = slugAttribute ? slugAttribute.value : '';
+    const [magentoAttributeSize, magentoAttributeColor] = await Promise.all([
+      magentoAttributeSizePromise,
+      magentoAttributeColorPromise,
+    ]);
 
-  const imageAttribute = magentoProduct.custom_attributes.find(
-    (attr) => attr.attribute_code === 'image',
-  );
-  // FIXME: Should read from env variable
-  const imageUrl = imageAttribute
-    ? `https://magento.test/media/catalog/product/${imageAttribute.value.slice(1)}`
-    : '';
+    this._magentoProductAttributesMapped = {
+      size: getMappedProductAttribute(magentoAttributeSize),
+      color: getMappedProductAttribute(magentoAttributeColor),
+    };
 
-  const variantPromises = magentoProductVariants.map<ProductVariant>(
-    (magentoProductVariant) => {
-      const variantSlugAttribute = magentoProduct.custom_attributes.find(
+    return this._magentoProductAttributesMapped;
+  }
+
+  async getProductVariantsBySku(sku: string): Promise<ProductVariant[]> {
+    const magentoProductVariants = await this.magentoService.get<
+      MagentoProductVariant[]
+    >(`configurable-products/${sku}/children`);
+    const magentoProductAttributesMapped =
+      await this.getSizeAndColorAttributesMapped();
+
+    const variants = magentoProductVariants.map<ProductVariant>(
+      this.transformMagentoProductVariantToProductVariant(
+        magentoProductAttributesMapped,
+      ),
+    );
+
+    return variants;
+  }
+
+  async getProductsByCategory(
+    categoryId: CategoryId,
+    offset: number,
+    limit: number,
+  ): Promise<ProductsResponse> {
+    const url = getProductsByCategoryUrl(categoryId, offset, limit);
+
+    const magentoProductsPromise =
+      await this.magentoService.get<MagentoProductsResponseGet>(url);
+
+    const [{ items: magentoProducts, total_count }] = await Promise.all([
+      magentoProductsPromise,
+    ]);
+
+    const magentoProductsWithVariantsPromises = magentoProducts.map<
+      Promise<Product>
+    >((magentoProduct) =>
+      this.transformMagentoProductToProduct(magentoProduct),
+    );
+
+    return {
+      results: await Promise.all(magentoProductsWithVariantsPromises),
+      total: total_count,
+      limit,
+      offset,
+    };
+  }
+
+  private async transformMagentoProductToProduct(
+    magentoProduct: MagentoProduct,
+  ): Promise<Product> {
+    const productVariants = await this.getProductVariantsBySku(
+      magentoProduct.sku,
+    );
+
+    const descriptionAttribute = magentoProduct.custom_attributes.find(
+      (attr) => attr.attribute_code === 'description',
+    );
+    const description = descriptionAttribute ? descriptionAttribute.value : '';
+
+    const slugAttribute = magentoProduct.custom_attributes.find(
+      (attr) => attr.attribute_code === 'url_key',
+    );
+    const slug = slugAttribute ? slugAttribute.value : '';
+
+    // Create the Product object
+    const product: Product = {
+      id: magentoProduct.id,
+      slug,
+      name: magentoProduct.name,
+      description,
+      variants: productVariants,
+      masterVariant: productVariants[0], // TODO: Review if this is correct
+    };
+
+    return product;
+  }
+
+  private transformMagentoProductVariantToProductVariant(
+    magentoProductAttributesMapped: MagentoProductAttributesMapped,
+  ): (
+    value: MagentoProductVariant,
+    index: number,
+    array: MagentoProductVariant[],
+  ) => ProductVariant {
+    const catalogProductMediaUrl = this.configService.get<string>(
+      'magentoMedia.catalog.product.image',
+    );
+
+    return (magentoProductVariant) => {
+      const imageAttribute = magentoProductVariant.custom_attributes.find(
+        (attr) => attr.attribute_code === 'image',
+      );
+
+      const imageUrl = imageAttribute
+        ? `${catalogProductMediaUrl}/${imageAttribute.value.slice(1)}`
+        : '';
+      const variantSlugAttribute = magentoProductVariant.custom_attributes.find(
         (attr) => attr.attribute_code === 'url_key',
       );
       const variantSlug = variantSlugAttribute
@@ -109,91 +188,6 @@ async function transformMagentoProductToProduct(
           .filter(Boolean),
         slug: variantSlug,
       };
-    },
-  );
-
-  const variants = await Promise.all(variantPromises);
-
-  // Create the Product object
-  const product: Product = {
-    id: magentoProduct.id,
-    slug,
-    name: magentoProduct.name,
-    description,
-    variants,
-    masterVariant: variants[0], // TODO: Review if this is correct
-  };
-
-  return product;
-}
-
-// function to transform MagentoProduct into Product
-@Injectable()
-export class ProductsService {
-  constructor(
-    private readonly magentoService: MagentoService,
-    private readonly utilsService: UtilsService,
-  ) {}
-
-  async getProductsByCategory(
-    categoryId: CategoryId,
-    offset: number,
-    limit: number,
-  ): Promise<ProductsResponse> {
-    // TODO: Transform to queryparams ??
-    const offsetParam = offset
-      ? `&searchCriteria[currentPage]=${getCurrentPage(offset, limit)}`
-      : '';
-    const limitParam = limit ? `&searchCriteria[pageSize]=${limit}` : '';
-    const url = `products?searchCriteria[filter_groups][0][filters][0][field]=category_id&searchCriteria[filter_groups][0][filters][0][value]=${categoryId}&searchCriteria[filter_groups][0][filters][0][condition_type]=eq&searchCriteria[filter_groups][1][filters][0][field]=visibility&searchCriteria[filter_groups][1][filters][0][value]=1&searchCriteria[filter_groups][1][filters][0][condition_type]=neq${offsetParam}${limitParam}`;
-
-    const magentoProductsPromise =
-      await this.magentoService.get<MagentoProductsResponseGet>(url);
-    const magentoAttributeSizePromise =
-      this.magentoService.get<MagentoProductAttribute>(
-        `products/attributes/size`,
-      );
-    const magentoAttributeColorPromise =
-      this.magentoService.get<MagentoProductAttribute>(
-        `products/attributes/color`,
-      );
-
-    const [
-      { items: magentoProducts, total_count },
-      magentoAttributeSize,
-      magentoAttributeColor,
-    ] = await Promise.all([
-      magentoProductsPromise,
-      magentoAttributeSizePromise,
-      magentoAttributeColorPromise,
-    ]);
-
-    const magentoProductAttributesMapped = {
-      size: getMappedProductAttribute(magentoAttributeSize),
-      color: getMappedProductAttribute(magentoAttributeColor),
-    };
-
-    const magentoProductsWithVariantsPromises = magentoProducts.map<
-      Promise<Product>
-    >((magentoProduct) => {
-      return this.magentoService
-        .get<
-          MagentoProductVariant[]
-        >(`configurable-products/${magentoProduct.sku}/children`)
-        .then((magentoProductVariants) => {
-          return transformMagentoProductToProduct(
-            magentoProduct,
-            magentoProductVariants,
-            magentoProductAttributesMapped,
-          );
-        });
-    });
-
-    return {
-      results: await Promise.all(magentoProductsWithVariantsPromises),
-      total: total_count,
-      limit,
-      offset,
     };
   }
 }

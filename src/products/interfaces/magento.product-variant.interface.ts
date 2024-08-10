@@ -1,5 +1,5 @@
 export type MagentoProductVariantId = number;
-export type MagentoProductVariantSKU = number;
+export type MagentoProductVariantSKU = string;
 
 export interface MagentoProductVariant {
   id: MagentoProductVariantId;

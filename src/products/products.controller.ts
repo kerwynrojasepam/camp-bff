@@ -10,8 +10,8 @@ export class ProductsController {
   @Get()
   getProductsByCategory(
     @Query('categoryId') categoryId: CategoryId,
-    @Query('offset') offset: number,
-    @Query('limit') limit: number,
+    @Query('offset') offset: number = null,
+    @Query('limit') limit: number = null,
   ): Promise<ProductsResponse> {
     return this.productsService.getProductsByCategory(
       categoryId,
