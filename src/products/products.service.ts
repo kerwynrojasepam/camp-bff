@@ -119,7 +119,8 @@ export class ProductsService {
     );
 
     const masterVariant = variantSKU
-      ? productVariants.find((variant) => variant.sku === variantSKU)
+      ? (productVariants.find((variant) => variant.sku === variantSKU) ??
+        productVariants[0])
       : productVariants[0];
 
     const descriptionAttribute = magentoProduct.custom_attributes.find(
