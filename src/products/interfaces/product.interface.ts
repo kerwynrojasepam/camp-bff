@@ -6,6 +6,12 @@ export enum CurrencyCode {
   USD = 'USD',
 }
 
+export enum ProductType {
+  Simple = 'simple',
+  Bundle = 'bundle',
+  Configurable = 'configurable',
+}
+
 export interface ProductPrice {
   value: {
     currencyCode: CurrencyCode;

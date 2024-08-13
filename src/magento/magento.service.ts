@@ -25,9 +25,9 @@ export class MagentoService {
     );
   }
 
-  async post<MagentoResponseData, MagentoBody>(
+  async post<MagentoResponseData, MagentoBody = null>(
     path: string,
-    data: MagentoBody,
+    data?: MagentoBody,
   ) {
     return this.utilsService.getPromisifiedResponse(
       this.httpService.post<MagentoResponseData>(this.getUrl(path), data),
@@ -40,9 +40,9 @@ export class MagentoService {
     );
   }
 
-  async patch<MagentoResponseData, MagentoBody>(
+  async patch<MagentoResponseData, MagentoBody = null>(
     path: string,
-    data: MagentoBody,
+    data?: MagentoBody,
   ) {
     return this.utilsService.getPromisifiedResponse(
       this.httpService.patch<MagentoResponseData>(this.getUrl(path), data),
