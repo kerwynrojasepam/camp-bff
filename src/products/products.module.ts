@@ -7,5 +7,6 @@ import { MagentoModule } from 'src/magento';
   imports: [MagentoModule],
   controllers: [ProductsController],
   providers: [ProductsService],
+  exports: [ProductsService],
 })
 export class ProductsModule {}

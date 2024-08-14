@@ -26,6 +26,6 @@ export class ProductsController {
 
   @Get(':sku')
   getProductBySKU(@Param('sku') sku: ProductSKU): Promise<Product> {
-    return this.productsService.getProductBySKU(sku);
+    return this.productsService.getParentProductBySKU(sku);
   }
 }

@@ -1,23 +1,23 @@
 import { Address, CustomAttribute } from 'src/magento/common.interfaces';
 
 export interface MagentoSetShippingAddressDto {
-  adressInformation: AddressInformation;
+  addressInformation: AddressInformation;
 }
 
 export interface MagentoSetShippingAddressResponse {
-  payment_methods: PaymentMethod[];
-  totals: Totals;
+  payment_methods: MagentoPaymentMethod[];
+  totals: MagentoCartTotals;
   extension_attributes: MagentoSetShippingAddressResponseExtensionAttributes;
 }
 
 interface MagentoSetShippingAddressResponseExtensionAttributes {}
 
-interface PaymentMethod {
+export interface MagentoPaymentMethod {
   code: string;
   title: string;
 }
 
-interface Totals {
+export interface MagentoCartTotals {
   grand_total: number;
   base_grand_total: number;
   subtotal: number;
@@ -151,7 +151,7 @@ interface AddressInformationExtensionAttributes {}
 
 interface AddressInformation {
   shipping_address: ShippingAddress;
-  billing_address?: ShippingAddress;
+  billing_address: ShippingAddress;
   shipping_method_code: string;
   shipping_carrier_code: string;
   extension_attributes?: AddressInformationExtensionAttributes;

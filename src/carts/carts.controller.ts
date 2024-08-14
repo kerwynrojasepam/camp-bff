@@ -53,7 +53,7 @@ export class CartsController {
     }
   }
 
-  @Post('/carts/:cartId/order')
+  @Post(':cartId/order')
   createOrderFromCart(@Param('cartId') cartId: CartId): Promise<void> {
     return this.cartsService.createOrderFromCart(cartId);
   }
