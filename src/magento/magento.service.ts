@@ -34,7 +34,10 @@ export class MagentoService {
     );
   }
 
-  async put<MagentoResponseData, MagentoBody>(path: string, data: MagentoBody) {
+  async put<MagentoResponseData, MagentoBody = null>(
+    path: string,
+    data?: MagentoBody,
+  ) {
     return this.utilsService.getPromisifiedResponse(
       this.httpService.put<MagentoResponseData>(this.getUrl(path), data),
     );

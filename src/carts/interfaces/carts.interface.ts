@@ -1,4 +1,5 @@
 import {
+  Product,
   ProductId,
   ProductSKU,
   ProductType,
@@ -12,11 +13,11 @@ export interface Price {
   centAmount: number;
 }
 
-export interface LineItem {
+export interface CartLineItem {
   item_id: ProductId;
   sku: ProductSKU;
   qty: number;
-  name: string;
+  name: Product['name'];
   price: number;
   product_type: ProductType;
   quote_id: string;
@@ -26,7 +27,7 @@ export interface Cart {
   id: CartId;
   version: number;
   customerId: CustomerId;
-  lineItems: LineItem[];
+  lineItems: CartLineItem[];
   totalPrice: Price;
   totalQuantity: number;
 }
