@@ -14,11 +14,17 @@ import {
   ChangeLineItemQuantityDto,
   RemoveLineItemDto,
   RemoveLineItemResponse,
+  SetShippingAddressDto,
+  SetShippingAddressResponse,
 } from './interfaces/carts.dto.interface';
 import {
   MagentoAddUpdateItemDto,
   MagentoAddUpdateItemResponse,
 } from './interfaces/magento.carts.add-update-item.dto.interface';
+import {
+  MagentoSetShippingAddressDto,
+  MagentoSetShippingAddressResponse,
+} from './interfaces/magento.carts.set-shipping-address.dto.interface';
 
 @Injectable()
 export class CartsService {
@@ -143,5 +149,46 @@ export class CartsService {
     );
 
     return magentoRemoveLineItem;
+  }
+
+  async setShippingAddress(
+    cartId: CartId,
+    setShippingAddressDto: SetShippingAddressDto,
+  ): Promise<SetShippingAddressResponse> {
+    const shippingAddressDto = setShippingAddressDto.SetShippingAddress;
+    const magentoShippingAddressResponse = await this.magentoService.post<
+      MagentoSetShippingAddressResponse,
+      MagentoSetShippingAddressDto
+    >(`guest-carts/${cartId}/shipping-information`, {
+      adressInformation: {
+        shipping_method_code: '', // TODO: Implement shipping_method_code
+        shipping_carrier_code: '', // TODO: Implement shipping_carrier_code
+        shipping_address: {
+          country_id: shippingAddressDto.country,
+          firstname: shippingAddressDto.firstName,
+          lastname: shippingAddressDto.lastName,
+          street: [
+            shippingAddressDto.streetName,
+            shippingAddressDto.streetNumber,
+          ],
+          postcode: shippingAddressDto.postalCode,
+          city: shippingAddressDto.city,
+          region_id: 0, // TODO: Implement region_id
+          region: shippingAddressDto.region,
+          region_code: '', // TODO: Implement region_code
+          email: shippingAddressDto.email,
+          telephone: '', // TODO: Implement telephone
+        },
+      },
+    });
+
+    return {
+      payment_methods: magentoShippingAddressResponse.payment_methods,
+      totals: magentoShippingAddressResponse.totals,
+    };
+  }
+
+  createOrderFromCart(cartId: CartId): Promise<void> {
+    return this.magentoService.post<void>(`guest-carts/${cartId}/order`);
   }
 }

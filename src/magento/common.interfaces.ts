@@ -22,14 +22,14 @@ export interface Address {
   custom_attributes: CustomAttribute[];
 }
 
-interface Region {
+export interface Region {
   region_code: string;
   region: string;
   region_id: number;
   extension_attributes: NonNullable<unknown>;
 }
 
-interface CustomAttribute {
+export interface CustomAttribute {
   attribute_code: string;
   value: string;
 }
