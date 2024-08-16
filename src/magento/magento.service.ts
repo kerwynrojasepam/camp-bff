@@ -25,24 +25,27 @@ export class MagentoService {
     );
   }
 
-  async post<MagentoResponseData, MagentoBody>(
+  async post<MagentoResponseData, MagentoBody = null>(
     path: string,
-    data: MagentoBody,
+    data?: MagentoBody,
   ) {
     return this.utilsService.getPromisifiedResponse(
       this.httpService.post<MagentoResponseData>(this.getUrl(path), data),
     );
   }
 
-  async put<MagentoResponseData, MagentoBody>(path: string, data: MagentoBody) {
+  async put<MagentoResponseData, MagentoBody = null>(
+    path: string,
+    data?: MagentoBody,
+  ) {
     return this.utilsService.getPromisifiedResponse(
       this.httpService.put<MagentoResponseData>(this.getUrl(path), data),
     );
   }
 
-  async patch<MagentoResponseData, MagentoBody>(
+  async patch<MagentoResponseData, MagentoBody = null>(
     path: string,
-    data: MagentoBody,
+    data?: MagentoBody,
   ) {
     return this.utilsService.getPromisifiedResponse(
       this.httpService.patch<MagentoResponseData>(this.getUrl(path), data),

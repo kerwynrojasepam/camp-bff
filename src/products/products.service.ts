@@ -19,6 +19,7 @@ import {
 } from './interfaces/magento.product-attribute.interface';
 import { getMappedProductAttribute, getProductsByCategoryUrl } from './utils';
 import { ConfigService } from '@nestjs/config';
+import { getCentAmount } from 'src/utils/getCentAmount';
 
 @Injectable()
 export class ProductsService {
@@ -179,7 +180,7 @@ export class ProductsService {
         prices: [
           {
             value: {
-              centAmount: magentoProductVariant.price * 100,
+              centAmount: getCentAmount(magentoProductVariant.price),
               currencyCode: CurrencyCode.USD, // TODO: Validate how to get correct currency
             },
           },
