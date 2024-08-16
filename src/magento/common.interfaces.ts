@@ -1,3 +1,5 @@
+export type CustomerId = string;
+
 export interface Address {
   id: number;
   customer_id: number;
@@ -22,14 +24,14 @@ export interface Address {
   custom_attributes: CustomAttribute[];
 }
 
-interface Region {
+export interface Region {
   region_code: string;
   region: string;
   region_id: number;
   extension_attributes: NonNullable<unknown>;
 }
 
-interface CustomAttribute {
+export interface CustomAttribute {
   attribute_code: string;
   value: string;
 }
@@ -97,4 +99,19 @@ export interface Shipping {
   address: Address;
   method: string;
   extension_attributes: NonNullable<unknown>;
+}
+
+export interface PriceValue {
+  currencyCode?: string;
+  centAmount?: number;
+}
+
+export interface Price {
+  id?: string;
+  value?: PriceValue;
+}
+
+export interface Image {
+  url?: string;
+  label?: string;
 }

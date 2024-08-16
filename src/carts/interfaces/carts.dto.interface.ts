@@ -3,6 +3,10 @@ import {
   ProductSKU,
 } from 'src/products/interfaces/product.interface';
 import { CartLineItem } from './carts.interface';
+import {
+  MagentoCartTotals,
+  MagentoPaymentMethod,
+} from './magento.carts.set-shipping-address.dto.interface';
 
 export enum UpdateCartAction {
   ADD_LINE_ITEM = 'AddLineItem',
@@ -59,3 +63,17 @@ export type UpdateCartDto = { version: number } & (
 export interface AddUpdateItemResponse extends CartLineItem {}
 
 export type RemoveLineItemResponse = boolean;
+
+export interface SetShippingAddressResponse {
+  payment_methods: PaymentMethod[];
+  totals: CartTotals;
+}
+
+export interface PaymentInformationResponse {
+  payment_methods: PaymentMethod[];
+  totals: CartTotals;
+}
+
+interface PaymentMethod extends MagentoPaymentMethod {}
+
+interface CartTotals extends MagentoCartTotals {}

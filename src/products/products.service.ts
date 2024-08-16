@@ -12,7 +12,6 @@ import {
 } from './interfaces/magento.product.interface';
 import { MagentoService } from 'src/magento/magento.service';
 import { CategoryId } from 'src/categories/interfaces/category.interface';
-import { MagentoProductVariant } from './interfaces/magento.product-variant.interface';
 import {
   MagentoProductAttribute,
   MagentoProductAttributesMapped,
@@ -59,7 +58,7 @@ export class ProductsService {
 
   async getProductVariantsBySku(sku: string): Promise<ProductVariant[]> {
     const magentoProductVariants = await this.magentoService.get<
-      MagentoProductVariant[]
+      MagentoProduct[]
     >(`configurable-products/${sku}/children`);
     const magentoProductAttributesMapped =
       await this.getSizeAndColorAttributesMapped();
@@ -90,7 +89,7 @@ export class ProductsService {
     const magentoProductsWithVariantsPromises = magentoProducts.map<
       Promise<Product>
     >((magentoProduct) =>
-      this.transformMagentoProductToProduct(magentoProduct),
+      this.transformMagentoConfigurableProductToProduct(magentoProduct),
     );
 
     return {
@@ -101,29 +100,36 @@ export class ProductsService {
     };
   }
 
-  async getProductBySKU(sku: ProductSKU): Promise<Product> {
+  async getParentProductBySKU(sku: ProductSKU): Promise<Product> {
     // TODO: Find a better way to get the parent SKU
     const parentSKU = sku.split('-')[0];
     const magentoProduct = await this.magentoService.get<MagentoProduct>(
       `products/${parentSKU}`,
     );
 
-    return this.transformMagentoProductToProduct(magentoProduct, sku);
+    return this.transformMagentoConfigurableProductToProduct(
+      magentoProduct,
+      sku,
+    );
+  }
+
+  async getProductVariantBySKU(sku: ProductSKU): Promise<ProductVariant> {
+    const magentoProductAttributesMapped =
+      await this.getSizeAndColorAttributesMapped();
+    const magentoProduct = await this.magentoService.get<MagentoProduct>(
+      `products/${sku}`,
+    );
+
+    return this.transformMagentoProductVariantToProductVariant(
+      magentoProductAttributesMapped,
+    )(magentoProduct, 0, [magentoProduct]);
   }
 
   private async transformMagentoProductToProduct(
     magentoProduct: MagentoProduct,
-    variantSKU: ProductSKU = null,
-  ): Promise<Product> {
-    const productVariants = await this.getProductVariantsBySku(
-      magentoProduct.sku,
-    );
-
-    const masterVariant = variantSKU
-      ? (productVariants.find((variant) => variant.sku === variantSKU) ??
-        productVariants[0])
-      : productVariants[0];
-
+    productVariants: ProductVariant[],
+    masterVariant: ProductVariant,
+  ) {
     const descriptionAttribute = magentoProduct.custom_attributes.find(
       (attr) => attr.attribute_code === 'description',
     );
@@ -147,12 +153,32 @@ export class ProductsService {
     return product;
   }
 
+  private async transformMagentoConfigurableProductToProduct(
+    magentoProduct: MagentoProduct,
+    variantSKU: ProductSKU = null,
+  ): Promise<Product> {
+    const productVariants = await this.getProductVariantsBySku(
+      magentoProduct.sku,
+    );
+
+    const masterVariant = variantSKU
+      ? (productVariants.find((variant) => variant.sku === variantSKU) ??
+        productVariants[0])
+      : productVariants[0];
+
+    return this.transformMagentoProductToProduct(
+      magentoProduct,
+      productVariants,
+      masterVariant,
+    );
+  }
+
   private transformMagentoProductVariantToProductVariant(
     magentoProductAttributesMapped: MagentoProductAttributesMapped,
   ): (
-    value: MagentoProductVariant,
+    value: MagentoProduct,
     index: number,
-    array: MagentoProductVariant[],
+    array: MagentoProduct[],
   ) => ProductVariant {
     const catalogProductMediaUrl = this.configService.get<string>(
       'magentoMedia.catalog.product.image',
@@ -174,7 +200,7 @@ export class ProductsService {
         : '';
 
       return {
-        id: magentoProductVariant.id,
+        id: `${magentoProductVariant.id}`,
         sku: magentoProductVariant.sku,
         name: magentoProductVariant.name,
         prices: [

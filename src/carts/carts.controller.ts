@@ -15,6 +15,7 @@ import {
   UpdateCartAction,
   AddUpdateItemResponse,
   RemoveLineItemResponse,
+  SetShippingAddressResponse,
 } from './interfaces/carts.dto.interface';
 
 @Controller('carts')
@@ -36,7 +37,9 @@ export class CartsController {
   updateCart(
     @Param('cartId') cartId: CartId,
     @Body() updateCartDto: UpdateCartDto,
-  ): Promise<AddUpdateItemResponse | RemoveLineItemResponse> {
+  ): Promise<
+    AddUpdateItemResponse | RemoveLineItemResponse | SetShippingAddressResponse
+  > {
     if (updateCartDto.action === UpdateCartAction.ADD_LINE_ITEM) {
       return this.cartsService.addLineItem(cartId, updateCartDto);
     } else if (
@@ -45,6 +48,13 @@ export class CartsController {
       return this.cartsService.changeLineItemQuantity(cartId, updateCartDto);
     } else if (updateCartDto.action === UpdateCartAction.REMOVE_LINE_ITEM) {
       return this.cartsService.removeLineItem(cartId, updateCartDto);
+    } else if (updateCartDto.action === UpdateCartAction.SET_SHIPPING_ADDRESS) {
+      return this.cartsService.setShippingAddress(cartId, updateCartDto);
     }
+  }
+
+  @Post(':cartId/order')
+  createOrderFromCart(@Param('cartId') cartId: CartId): Promise<void> {
+    return this.cartsService.createOrderFromCart(cartId);
   }
 }

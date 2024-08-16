@@ -1,16 +1,20 @@
+import { CustomerId, PriceValue } from 'src/magento/common.interfaces';
 import {
   Product,
   ProductId,
   ProductSKU,
   ProductType,
+  ProductVariant,
 } from 'src/products/interfaces/product.interface';
 
 export type CartId = string;
-export type CustomerId = string;
 
-export interface Price {
+export interface CartInnerLineItem extends CartLineItem {
+  id: ProductId;
+  variant: ProductVariant;
+  quantity: number;
+  totalPrice: number;
   currencyCode: string;
-  centAmount: number;
 }
 
 export interface CartLineItem {
@@ -28,6 +32,6 @@ export interface Cart {
   version: number;
   customerId: CustomerId;
   lineItems: CartLineItem[];
-  totalPrice: Price;
+  totalPrice: PriceValue;
   totalQuantity: number;
 }

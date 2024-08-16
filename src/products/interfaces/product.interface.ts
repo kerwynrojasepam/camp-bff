@@ -1,5 +1,7 @@
+import { Image, Price } from 'src/magento/common.interfaces';
+
 export type ProductId = number;
-export type ProductVariantId = number;
+export type ProductVariantId = string;
 export type ProductSKU = string;
 
 export enum CurrencyCode {
@@ -12,16 +14,23 @@ export enum ProductType {
   Configurable = 'configurable',
 }
 
-export interface ProductPrice {
-  value: {
-    currencyCode: CurrencyCode;
-    centAmount: number;
-  };
+export interface ProductVariant {
+  id: ProductVariantId;
+  sku: ProductSKU;
+  name: string;
+  prices: Price[];
+  images: ProductImage[];
+  attributes: ProductAttribute[];
+  slug: string;
+  availability?: ProductVariantAvailability;
 }
 
-export interface ProductImage {
-  url: string;
+export interface ProductVariantAvailability {
+  isOnStock?: boolean;
+  availableQty?: number;
 }
+
+export interface ProductImage extends Image {}
 
 export interface ProductAttribute {
   name: string;
@@ -29,16 +38,6 @@ export interface ProductAttribute {
     key: string;
     label: string;
   };
-}
-
-export interface ProductVariant {
-  id: ProductVariantId;
-  sku: ProductSKU;
-  name: string;
-  prices: ProductPrice[];
-  images: ProductImage[];
-  attributes: ProductAttribute[];
-  slug: string;
 }
 
 export interface Product {

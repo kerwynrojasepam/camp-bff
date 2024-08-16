@@ -7,6 +7,18 @@ import {
 } from 'src/magento/common.interfaces';
 
 export type MagentoGuestCartId = string;
+export type OrderId = number;
+
+export interface MagentoCreateOrderFromCartDto {
+  paymentMethod: {
+    po_number?: string;
+    method: string;
+    additional_data?: string[];
+    extension_attributes?: {
+      agreement_ids: string[];
+    };
+  };
+}
 
 interface CustomOptionExtensionAttributes {
   file_info: FileInfo;
