@@ -1,12 +1,13 @@
 import { Module } from '@nestjs/common';
 import { ProductsController } from './products.controller';
 import { ProductsService } from './products.service';
-import { MagentoModule } from 'src/magento';
+import { EcommerceModule } from 'src/ecommerce';
+import { EcommerceProductsFactory } from 'src/ecommerce/ecommerce.products.factory';
 
 @Module({
-  imports: [MagentoModule],
+  imports: [EcommerceModule],
   controllers: [ProductsController],
-  providers: [ProductsService],
+  providers: [ProductsService, EcommerceProductsFactory],
   exports: [ProductsService],
 })
 export class ProductsModule {}

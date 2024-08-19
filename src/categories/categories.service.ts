@@ -1,17 +1,20 @@
 import { Injectable } from '@nestjs/common';
 import { Category } from './interfaces/category.interface';
-import { MagentoCategory } from './interfaces/magento.category.interface';
-import { transformMagentoCategories } from './utils';
-import { MagentoService } from 'src/magento/magento.service';
+import { EcommerceCategoriesFactory } from 'src/ecommerce/ecommerce.categories.factory';
+import { EcommerceCategoriesService } from 'src/ecommerce/interfaces/ecommerce.categories.types';
 
 @Injectable()
 export class CategoriesService {
-  constructor(private readonly magentoService: MagentoService) {}
+  private ecommerceCategoriesService: EcommerceCategoriesService;
+
+  constructor(
+    private readonly ecommerceCategoriesFactory: EcommerceCategoriesFactory,
+  ) {
+    this.ecommerceCategoriesService =
+      this.ecommerceCategoriesFactory.getCategoriesService();
+  }
 
   async getCategories(): Promise<Category[]> {
-    const magentoCategory =
-      await this.magentoService.get<MagentoCategory>('categories');
-
-    return transformMagentoCategories([magentoCategory]);
+    return this.ecommerceCategoriesService.getCategories();
   }
 }

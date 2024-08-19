@@ -6,7 +6,7 @@ import { CartLineItem } from './carts.interface';
 import {
   MagentoCartTotals,
   MagentoPaymentMethod,
-} from './magento.carts.set-shipping-address.dto.interface';
+} from '../../magento/interfaces/magento.carts.set-shipping-address.dto.interface';
 
 export enum UpdateCartAction {
   ADD_LINE_ITEM = 'AddLineItem',
