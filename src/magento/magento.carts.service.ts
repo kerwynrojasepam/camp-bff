@@ -3,6 +3,7 @@ import {
   Cart,
   CartId,
   CartInnerLineItem,
+  CartResponse,
 } from 'src/carts/interfaces/carts.interface';
 import { MagentoService } from 'src/magento/magento.service';
 import { v4 as uuidv4 } from 'uuid';
@@ -11,10 +12,7 @@ import {
   MagentoGuestCart,
   OrderId,
 } from './interfaces/magento.carts.interface';
-import {
-  CurrencyCode,
-  ProductType,
-} from 'src/products/interfaces/product.interface';
+import { CurrencyCode } from 'src/products/interfaces/product.interface';
 import { getCentAmount } from 'src/utils/getCentAmount';
 import {
   AddLineItemDto,
@@ -35,6 +33,7 @@ import {
   MagentoSetShippingAddressResponse,
 } from './interfaces/magento.carts.set-shipping-address.dto.interface';
 import { MagentoProductsService } from './magento.products.service';
+import { ProductType } from './common.interfaces';
 
 @Injectable()
 export class MagentoCartsService {
@@ -60,7 +59,7 @@ export class MagentoCartsService {
     };
   }
 
-  async getCart(cartId: CartId): Promise<Cart> {
+  async getCart(cartId: CartId): Promise<CartResponse> {
     const magentoGuestCart = await this.magentoService.get<MagentoGuestCart>(
       `guest-carts/${cartId}`,
     );
@@ -75,13 +74,13 @@ export class MagentoCartsService {
           .getProductVariantBySKU(item.sku)
           .then(async (productVariant) => {
             const cartInnerLineItem: CartInnerLineItem = {
-              id: item.item_id,
+              id: `${item.item_id}`,
               variant: productVariant,
               quantity: item.qty,
               totalPrice: item.price,
               currencyCode: magentoGuestCart.currency.global_currency_code, // TODO: Verify currency code,
 
-              item_id: item.item_id,
+              item_id: `${item.item_id}`,
               sku: item.sku,
               qty: item.qty,
               name: item.name,
@@ -95,7 +94,7 @@ export class MagentoCartsService {
       );
     });
 
-    const cart: Cart = {
+    const cart: CartResponse = {
       id: cartId,
       version: 0, // TODO: Implement versioning
       customerId: magentoGuestCart.customer.id
@@ -128,7 +127,7 @@ export class MagentoCartsService {
     });
 
     return {
-      item_id: magentoAddUpdateItem.item_id,
+      item_id: `${magentoAddUpdateItem.item_id}`,
       sku: magentoAddUpdateItem.sku,
       qty: magentoAddUpdateItem.qty,
       name: magentoAddUpdateItem.name,
@@ -156,7 +155,7 @@ export class MagentoCartsService {
     });
 
     return {
-      item_id: magentoAddUpdateItem.item_id,
+      item_id: `${magentoAddUpdateItem.item_id}`,
       sku: magentoAddUpdateItem.sku,
       qty: magentoAddUpdateItem.qty,
       name: magentoAddUpdateItem.name,

@@ -144,7 +144,7 @@ export class MagentoProductsService implements EcommerceProductsService {
 
     // Create the Product object
     const product: Product = {
-      id: magentoProduct.id,
+      id: `${magentoProduct.id}`,
       slug,
       name: magentoProduct.name,
       description,
@@ -202,7 +202,7 @@ export class MagentoProductsService implements EcommerceProductsService {
         : '';
 
       return {
-        id: `${magentoProductVariant.id}`,
+        id: magentoProductVariant.id,
         sku: magentoProductVariant.sku,
         name: magentoProductVariant.name,
         prices: [

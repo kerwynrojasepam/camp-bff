@@ -1,17 +1,11 @@
 import { Image, Price } from 'src/magento/common.interfaces';
 
-export type ProductId = number;
-export type ProductVariantId = string;
+export type ProductId = string;
+export type ProductVariantId = number;
 export type ProductSKU = string;
 
 export enum CurrencyCode {
   USD = 'USD',
-}
-
-export enum ProductType {
-  Simple = 'simple',
-  Bundle = 'bundle',
-  Configurable = 'configurable',
 }
 
 export interface ProductVariant {

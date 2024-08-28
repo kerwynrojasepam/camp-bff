@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { EcommercePlatform } from './interfaces/ecommerce.interface';
 import { MagentoCartsService } from 'src/magento/magento.carts.service';
+import { CommerceToolsCartsService } from 'src/commerceTools/commerceTools.carts.service';
 
 @Injectable()
 export class EcommerceCartsFactory {
@@ -10,7 +11,7 @@ export class EcommerceCartsFactory {
   constructor(
     private readonly configService: ConfigService,
     private readonly magentoCartsService: MagentoCartsService,
-    // commercetoolsService; CommercetoolsService,
+    private readonly commercetoolsCartsService: CommerceToolsCartsService,
   ) {
     this.ecommercePlatform =
       this.configService.get<EcommercePlatform>('ecommercePlatform');
@@ -20,7 +21,7 @@ export class EcommerceCartsFactory {
     if (this.ecommercePlatform === EcommercePlatform.MAGENTO) {
       return this.magentoCartsService;
     } else {
-      // return this.commercetoolsService;
+      return this.commercetoolsCartsService;
     }
   }
 }

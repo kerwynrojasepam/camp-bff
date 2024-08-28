@@ -1,4 +1,4 @@
-export type CategoryId = number;
+export type CategoryId = string;
 
 export interface Parent {
   id: CategoryId;

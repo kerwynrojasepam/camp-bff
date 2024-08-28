@@ -40,7 +40,7 @@ export const transformMagentoCategories = (
     ];
 
     const transformedCategory: Category = {
-      id: category.id,
+      id: `${category.id}`,
       name: category.name,
       description: '', // Assuming no description is available in MagentoCategory
       slug: getSlug(category.id), // Creating a slug from the name
@@ -53,7 +53,7 @@ export const transformMagentoCategories = (
     category.children_data.forEach((childCategory) => {
       stack.push({
         category: childCategory,
-        parent: { id: category.id },
+        parent: { id: `${category.id}` },
         ancestors: currentAncestors,
       });
     });

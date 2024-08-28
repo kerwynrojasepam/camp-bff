@@ -1,12 +1,6 @@
-import {
-  ProductId,
-  ProductSKU,
-} from 'src/products/interfaces/product.interface';
+import { ProductSKU } from 'src/products/interfaces/product.interface';
 import { CartLineItem } from './carts.interface';
-import {
-  MagentoCartTotals,
-  MagentoPaymentMethod,
-} from '../../magento/interfaces/magento.carts.set-shipping-address.dto.interface';
+import { MagentoPaymentMethod } from '../../magento/interfaces/magento.carts.set-shipping-address.dto.interface';
 
 export enum UpdateCartAction {
   ADD_LINE_ITEM = 'AddLineItem',
@@ -26,7 +20,7 @@ export interface AddLineItemDto {
 export interface ChangeLineItemQuantityDto {
   action: UpdateCartAction.CHANGE_LINE_ITEM_QUANTITY;
   ChangeLineItemQuantity?: {
-    lineItemId: ProductId;
+    lineItemId: number;
     quantity: number;
   };
 }
@@ -34,7 +28,7 @@ export interface ChangeLineItemQuantityDto {
 export interface RemoveLineItemDto {
   action: UpdateCartAction.REMOVE_LINE_ITEM;
   RemoveLineItem: {
-    lineItemId: ProductId;
+    lineItemId: number;
   };
 }
 
@@ -76,4 +70,4 @@ export interface PaymentInformationResponse {
 
 interface PaymentMethod extends MagentoPaymentMethod {}
 
-interface CartTotals extends MagentoCartTotals {}
+interface CartTotals {}
