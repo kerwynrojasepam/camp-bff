@@ -7,6 +7,13 @@ export interface Commercetools {
   apiUrl: string;
   scopes: string[];
 }
+
+export interface ContentStackConfig {
+  apiKey: string;
+  deliveryToken: string;
+  environment: string;
+}
+
 export const globalConfig = () => ({
   port: process.env.PORT,
   ecommercePlatform: process.env.ECOMMERCE_PLATFORM,
@@ -29,5 +36,10 @@ export const globalConfig = () => ({
     authUrl: process.env.COMMERCETOOLS_AUTH_URL,
     apiUrl: process.env.COMMERCETOOLS_API_URL,
     scopes: process.env.COMMERCETOOLS_SCOPES.split(','),
+  },
+  contentStack: {
+    apiKey: process.env.CONTENTSTACK_API_KEY,
+    deliveryToken: process.env.CONTENTSTACK_DELIVERY_TOKEN,
+    environment: process.env.CONTENTSTACK_ENVIRONMENT,
   },
 });
