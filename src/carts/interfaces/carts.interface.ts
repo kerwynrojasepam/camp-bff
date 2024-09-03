@@ -3,7 +3,6 @@ import {
   Product,
   ProductId,
   ProductSKU,
-  ProductType,
   ProductVariant,
 } from 'src/products/interfaces/product.interface';
 
@@ -23,7 +22,7 @@ export interface CartLineItem {
   qty: number;
   name: Product['name'];
   price: number;
-  product_type: ProductType;
+  product_type: string;
   quote_id: string;
 }
 
@@ -34,4 +33,8 @@ export interface Cart {
   lineItems: CartLineItem[];
   totalPrice: PriceValue;
   totalQuantity: number;
+}
+
+export interface CartResponse extends Cart {
+  lineItems: CartInnerLineItem[];
 }

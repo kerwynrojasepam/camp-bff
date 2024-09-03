@@ -1,11 +1,5 @@
 export type CustomerId = string;
 
-export enum ProductType {
-  Simple = 'simple',
-  Bundle = 'bundle',
-  Configurable = 'configurable',
-}
-
 export interface Address {
   id: number;
   customer_id: number;
